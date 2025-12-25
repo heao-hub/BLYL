@@ -253,8 +253,8 @@ public class LR1Parser {
     }
 
     static class SemInfo {
-        String place;           // 表示这个表达式或变量的名字
-        List<String> code;      // 保存该表达式或语句生成的 TAC
+        String place;           // 表示这个表达式或变量的地址
+        List<String> code;      // 保存该表达式或语句生成的三地址码
 
         SemInfo(String p) {
             this.place = p;
@@ -359,7 +359,7 @@ public class LR1Parser {
 
         switch (prodId) {
             case 1: {
-                // R → for ( A C ; A1 ) {S}
+                // R → for ( A C ; A1 ) {B}
                 SemInfo init = popped.get(2).val;   // 初始化语句 S
                 SemInfo cond = popped.get(3).val;   // 条件表达式 C
                 SemInfo step = popped.get(5).val;   // 步进语句 S
@@ -506,9 +506,20 @@ public class LR1Parser {
                 break;
             }
 
-            case 18: case 19: case 20: case 21: {
-                // F → id | num | (E)
+            case 18:{
+                // T → F
                 newInfo = popped.get(0).val;
+                break;
+            }
+
+            case 19: case 20: {
+                // F → id | num
+                newInfo = popped.get(0).val;
+                break;
+            }
+
+            case 21:{
+                newInfo = popped.get(1).val;
                 break;
             }
 
@@ -531,6 +542,7 @@ public class LR1Parser {
                 break;
             }
             case 24:{
+                // S → R
                 newInfo = popped.get(0).val;
                 break;
             }

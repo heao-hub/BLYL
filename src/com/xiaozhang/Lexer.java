@@ -12,6 +12,9 @@ public class Lexer {
             '(',')','{','}',';',',','[',']'
     );
 
+    private static final Set<Character> OPS = Set.of(
+            '+','-','*','/','=','!','|','&','%','>','<'
+    );
     private final String code;
     private int index = 0;
     private int line = 1, col = 1;
@@ -23,6 +26,7 @@ public class Lexer {
     }
 
     public Token nextToken() {
+        // 去除空格
         while (index < code.length() &&
                 Character.isWhitespace(code.charAt(index))) {
             consumeWhitespace();
@@ -78,7 +82,7 @@ public class Lexer {
                 if (Character.isLetter(c) || c == '_') return DFA.DFAState.ID;
                 if (Character.isDigit(c)) return DFA.DFAState.INT;
                 if (c == '.') return DFA.DFAState.DOT;
-                if ("+-*/=!<>|&%".indexOf(c) >= 0) return DFA.DFAState.OP;
+                if (OPS.contains(c)) return DFA.DFAState.OP;
                 if (DELIMS.contains(c)) return DFA.DFAState.DELIM;
                 return null;
 
@@ -129,7 +133,7 @@ public class Lexer {
         return list;
     }
 
-    // ===== Token =====
+
     public enum TokenType {
         KEYWORD, IDENTIFIER, INT_CONST, FLOAT_CONST,
         OPERATOR, DELIMITER, ERROR, EOF

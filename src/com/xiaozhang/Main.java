@@ -34,8 +34,9 @@ public class Main {
         if (!res.success) {
             System.out.println("Parse failed:\n" + res.message);
         } else {
+            int count = 1;
             System.out.println("Parse succeeded. Generated three-address code:");
-            for (String line : res.code) System.out.println("  " + line);
+            for (String line : res.code) System.out.println((count++)+":  " + line);
             System.out.println("\n(Trace and parser messages)\n" + res.message);
         }
     }

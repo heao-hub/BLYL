@@ -1,6 +1,5 @@
 package com.xiaozhang;
 import java.util.*;
-import java.util.*;
 
 public class DFA {
     enum DFAState {
@@ -91,4 +90,3 @@ public class DFA {
         }
     }
 }
-
