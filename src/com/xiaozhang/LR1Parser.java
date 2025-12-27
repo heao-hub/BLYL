@@ -306,8 +306,10 @@ public class LR1Parser {
                 // 分析成功acc
                 if (verbose) parseTrace.append("Accept.\n");
                 if (!symStack.isEmpty()) {
-                    StackElem top = symStack.peek();
-                    SemInfo si =  top.val;
+                    SemInfo result = symStack.peek().val;
+                    for (String line : result.code) {
+                        tacGenerator.emit(line);
+                    }
                     return new ParseResult(true,tacGenerator.getCode(), parseTrace.toString()+"OK");
                 }
                 return new ParseResult(true, new ArrayList<>(), parseTrace.toString()+"OK(no code)");
@@ -366,34 +368,24 @@ public class LR1Parser {
                 SemInfo body = popped.get(8).val;   // 循环体 B
 
                 String Lbegin = tacGenerator.newLabel();
-                String Lend = tacGenerator.newLabel();
-
-                // 初始化语句
-                for (String line : init.code) tacGenerator.emit(line);
-
-                // 开始循环标签
-                tacGenerator.emit(Lbegin + ":");
-
-                // 条件判断
-                tacGenerator.emit("ifFalse " + cond.place + " goto " + Lend);
-
-                // 循环体
-                if (body != null) {
-                    for (String line : body.code) tacGenerator.emit(line);
-                }
-
-                // 步进语句
-                if (step != null) {
-                    for (String line : step.code) tacGenerator.emit(line);
-                }
-
-                // 跳回循环开始
-                tacGenerator.emit("goto " + Lbegin);
-
-                // 循环结束标签
-                tacGenerator.emit(Lend + ":");
-
-                newInfo = new SemInfo(null);
+                String Lend   = tacGenerator.newLabel();
+                List<String> code = new ArrayList<>();
+                // A
+                if (init != null) code.addAll(init.code);
+                // Lbegin
+                code.add(Lbegin + ":");
+                // C
+                if (cond != null) code.addAll(cond.code);
+                code.add("ifFalse " + cond.place + " goto " + Lend);
+                // B
+                if (body != null) code.addAll(body.code);
+                // A1
+                if (step != null) code.addAll(step.code);
+                // 回跳
+                code.add("goto " + Lbegin);
+                // Lend
+                code.add(Lend + ":");
+                newInfo = new SemInfo(null, code);
                 break;
             }
 
@@ -451,13 +443,13 @@ public class LR1Parser {
                 code.add("ifFalse " + cond.place + " goto " + Lelse);
 
                 // then 分支
-                for (String line : thenStmt.code) code.add(line);
+                code.addAll(thenStmt.code);
 
                 code.add("goto " + Lend);
 
                 // else 分支
                 code.add(Lelse + ":");
-                for (String line : elseStmt.code) code.add(line);
+                code.addAll(elseStmt.code);
 
                 // 结束标签
                 code.add(Lend + ":");
@@ -519,13 +511,14 @@ public class LR1Parser {
             }
 
             case 21:{
+                // F → (E)
                 newInfo = popped.get(1).val;
                 break;
             }
 
             case 22:{
                 // B → B S
-                System.out.println(popped);
+                // System.out.println(popped);
                 SemInfo b = popped.get(0).val;
                 SemInfo s = popped.get(1).val;
 

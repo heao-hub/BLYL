@@ -82,6 +82,7 @@ public class Lexer {
                 if (Character.isLetter(c) || c == '_') return DFA.DFAState.ID;
                 if (Character.isDigit(c)) return DFA.DFAState.INT;
                 if (c == '.') return DFA.DFAState.DOT;
+                if (c == '-') return DFA.DFAState.INT;
                 if (OPS.contains(c)) return DFA.DFAState.OP;
                 if (DELIMS.contains(c)) return DFA.DFAState.DELIM;
                 return null;
@@ -105,7 +106,7 @@ public class Lexer {
                 return null;
 
             case OP:
-                if ("=<>|&+-".indexOf(c) >= 0)
+                if (OPS.contains(c))
                     return DFA.DFAState.OP;
                 return null;
 
